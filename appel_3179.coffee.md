@@ -35,6 +35,12 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
 - session
 - action()
 
+      debug 'Start',
+        direction: @session.direction
+        dialplan: @session.dialplan
+        country: @session.country
+        destination: @destination
+
       return unless @session.direction is 'egress'
       return unless @session.dialplan is 'national'
       return unless @session.country is 'fr'
