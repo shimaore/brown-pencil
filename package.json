@@ -1,0 +1,29 @@
+{
+  "name": "brown-pencil",
+  "version": "1.0.0",
+  "description": "RIO voice server",
+  "main": "index.js",
+  "directories": {
+    "prepublish": "coffee -c *.coffee.md",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.k-net.fr:shimaore/brown-pencil.git"
+  },
+  "author": "Stéphane Alnet <stephane@shimaore.net> (http://stephane.shimaore.net/)",
+  "license": "Unlicense (http://unlicense.org/)",
+  "devDependencies": {
+    "coffee-script": "^1.10.0",
+    "mocha": "^2.3.3"
+  },
+  "dependencies": {
+    "bluebird": "^2.10.2",
+    "caring-band": "^1.4.2",
+    "debug": "^2.2.0",
+    "seem": "^1.1.0"
+  }
+}
