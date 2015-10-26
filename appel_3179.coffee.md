@@ -25,7 +25,7 @@
         play: (file) =>
           @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{file}.wav"
 
-        spell: seem (text) =>
+        spell: (text) =>
           @action 'phrase', "say-iterated,#{text}"
 
 Should we intercept on the global format (3303179) or the local format?
@@ -53,7 +53,7 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
         @session.dtmf_buffer += res.body['DTMF-Digit']
         debug "dtmf_buffer = `#{@session.dtmf_buffer}`"
 
-      get_rio_index = (rios) ->
+      get_rio_index = seem (rios) ->
         @session.dtmf_number = ''
         if rios.lengh > 1
           yield @rio.play 'welcome_internal'
@@ -123,13 +123,13 @@ We don't have a proper list of customer mobile numbers at this time. Skip until 
       yield @rio.playback "digits/2"
       ###
 
-      send_sms = (recipient,text) =>
+      send_sms = seem (recipient,text) =>
         yield @rio.playback 'ivr/ivr-thank_you_alt'
 
-      send_email = (recipient,html) =>
+      send_email = seem (recipient,html) =>
         yield @rio.playback 'ivr/ivr-thank_you_alt'
 
-      send_snailmail = (recipient,address) =>
+      send_snailmail = seem (recipient,address) =>
         yield @rio.playback 'ivr/ivr-thank_you_alt'
 
 
