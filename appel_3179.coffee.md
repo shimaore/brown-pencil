@@ -53,7 +53,7 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
         @session.dtmf_buffer += res.body['DTMF-Digit']
         debug "dtmf_buffer = `#{@session.dtmf_buffer}`"
 
-      get_rio_index = seem (rios) ->
+      get_rio_index = seem (rios) =>
         @session.dtmf_number = ''
         if rios.lengh > 1
           yield @rio.play 'welcome_internal'
