@@ -17,6 +17,9 @@
         country: @session.country
         destination: @destination
 
+      @set
+        language: 'fr-fr'
+
 `provisioning` is a `nimble-direction` convention.
 
       ctx.rio ?=
