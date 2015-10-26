@@ -29,7 +29,7 @@
           @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{file}.wav"
 
         spell: (text) =>
-          @action 'phrase', "say-iterated,#{text}"
+          @action 'phrase', "spell,#{text}"
 
 Should we intercept on the global format (3303179) or the local format?
 This needs to be global so that it works for Centrex as well.
