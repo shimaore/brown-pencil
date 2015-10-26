@@ -24,7 +24,7 @@
 
       ctx.rio ?=
         playback: (file) =>
-          @action 'playback', "#{file.wav}"
+          @action 'playback', "#{file}.wav"
         play: (file) =>
           @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{file}.wav"
 
