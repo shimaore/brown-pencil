@@ -18,7 +18,7 @@
         destination: @destination
 
       @set
-        language: 'fr-fr'
+        language: 'fr-FR'
 
 `provisioning` is a `nimble-direction` convention.
 
