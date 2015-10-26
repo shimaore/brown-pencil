@@ -4,10 +4,11 @@
   "description": "RIO voice server",
   "main": "index.js",
   "directories": {
-    "prepublish": "coffee -c *.coffee.md",
     "test": "test"
   },
   "scripts": {
+    "prepublish": "coffee -m -c *.coffee.md",
+    "pretest": "npm install",
     "test": "mocha"
   },
   "repository": {
