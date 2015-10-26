@@ -11,6 +11,12 @@
 
     @include = seem (ctx) ->
 
+      debug 'Start',
+        direction: @session.direction
+        dialplan: @session.dialplan
+        country: @session.country
+        destination: @destination
+
 `provisioning` is a `nimble-direction` convention.
 
       ctx.rio ?=
@@ -34,12 +40,6 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
 - req.header()
 - session
 - action()
-
-      debug 'Start',
-        direction: @session.direction
-        dialplan: @session.dialplan
-        country: @session.country
-        destination: @destination
 
       return unless @session.direction is 'egress'
       return unless @session.dialplan is 'national'
