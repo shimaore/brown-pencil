@@ -20,6 +20,7 @@
 
       @set
         language: 'fr-FR'
+        playback_terminators: '1234567890#*'
 
 `provisioning` is a `nimble-direction` convention.
 
