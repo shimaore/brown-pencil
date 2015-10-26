@@ -108,6 +108,20 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
       yield @rio.spell @session.rio
       yield @rio.play 'dont_cancel'
 
+
+Tools to send out
+=================
+
+      send_sms = seem (recipient,text) =>
+        yield @rio.playback 'ivr/ivr-thank_you_alt'
+
+      send_email = seem (recipient,html) =>
+        yield @rio.playback 'ivr/ivr-thank_you_alt'
+
+      send_snailmail = seem (recipient,address) =>
+        yield @rio.playback 'ivr/ivr-thank_you_alt'
+
+
 Destination
 ===========
 
@@ -128,16 +142,6 @@ We don't have a proper list of customer mobile numbers at this time. Skip until 
       yield @rio.play 'sms_unknown'
       yield @rio.playback "digits/2"
       ###
-
-      send_sms = seem (recipient,text) =>
-        yield @rio.playback 'ivr/ivr-thank_you_alt'
-
-      send_email = seem (recipient,html) =>
-        yield @rio.playback 'ivr/ivr-thank_you_alt'
-
-      send_snailmail = seem (recipient,address) =>
-        yield @rio.playback 'ivr/ivr-thank_you_alt'
-
 
 Send via email
 --------------
