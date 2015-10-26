@@ -187,3 +187,6 @@ Send via postmail
           """
         when '4'
           send_snailmail @session.doc.nom, @session.doc.address_de_facturation
+
+        else
+          yield @rio.playback 'ivr/ivr-thank_you_alt'
