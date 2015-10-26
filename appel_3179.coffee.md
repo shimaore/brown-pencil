@@ -4,6 +4,7 @@
     seem = require 'seem'
     CaringBand = require 'caring-band'
     Promise = require 'bluebird'
+    path = require 'path'
     seconds = 1000
 
     @server_pre = ->
@@ -24,7 +25,9 @@
 
       ctx.rio ?=
         playback: (file) =>
-          @action 'playback', "#{file}.wav"
+          sound_dir = cfg.sound_dir ? '/opt/freeswitch/sounds'
+          sound_path = cfg.sound_path ? path.join sound_dir, 'fr', 'fr', 'sibylle'
+          @action 'playback', path.join sound_path, "#{file}.wav"
         play: (file) =>
           @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{file}.wav"
 
