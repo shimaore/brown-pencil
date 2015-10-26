@@ -54,13 +54,13 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
 
       @statistics.emit 'rio-request', source:@source
 
-      @call.on 'DTMF', (res) ->
+      @call.on 'DTMF', (res) =>
         @session.dtmf_buffer ?= ''
         @session.dtmf_buffer += res.body['DTMF-Digit']
         debug "dtmf_buffer = `#{@session.dtmf_buffer}`"
 
       get_rio_index = seem (rios) =>
-        @session.dtmf_number = ''
+        @session.dtmf_buffer = ''
         if rios.lengh > 1
           yield @rio.play 'welcome_internal'
           yield @rio.play 'enter_number_first'
@@ -71,12 +71,12 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
             yield @rio.playback "digits/#{i+1}"
             yield Promise.delay 3*seconds
         else
-          @session.dtmf_number = '1'
+          @session.dtmf_buffer = '1'
 
-        if @session.dtmf_number.length is 0
+        if @session.dtmf_buffer.length is 0
           get_rio_index()
         else
-          index = parseInt(@session.dtmf_number)-1
+          index = parseInt(@session.dtmf_buffer)-1
           @session.number = rios[index].number
           @session.rio = rios[index].rio
 
@@ -111,7 +111,7 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
 Destination
 ===========
 
-      @session.dtmf_number = ''
+      @session.dtmf_buffer = ''
 
 Send via SMS
 ------------
@@ -161,15 +161,15 @@ Send via postmail
         Le RIO associé au numéro #{@session.number[0...6]}XXXX est #{@session.rio}.
       """
 
-      switch @session.dtmf_number
+      switch @session.dtmf_buffer
         when '1'
           if @session.doc.mobile?
             send_sms @session.doc.mobile, sms_text
         when '2'
-          @session.dtmf_number = ''
+          @session.dtmf_buffer = ''
           yield @rio.playback 'ivr/ivr-please_enter_the_phone_number'
           yield Promise.delay 16*seconds
-          send_sms @session.dtmf_number, sms_text
+          send_sms @session.dtmf_buffer, sms_text
         when '3'
           send_email @session.doc.email, """
             <p>
