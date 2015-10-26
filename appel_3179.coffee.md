@@ -25,8 +25,8 @@
 
       ctx.rio ?=
         playback: (file) =>
-          sound_dir = cfg.sound_dir ? '/opt/freeswitch/sounds'
-          sound_path = cfg.sound_path ? path.join sound_dir, 'fr', 'fr', 'sibylle'
+          sound_dir = @cfg.sound_dir ? '/opt/freeswitch/sounds'
+          sound_path = @cfg.sound_path ? path.join sound_dir, 'fr', 'fr', 'sibylle'
           @action 'playback', path.join sound_path, "#{file}.wav"
         play: (file) =>
           @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{file}.wav"
