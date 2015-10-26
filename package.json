@@ -1,6 +1,6 @@
 {
   "name": "brown-pencil",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "RIO voice server",
   "main": "index.js",
   "directories": {
