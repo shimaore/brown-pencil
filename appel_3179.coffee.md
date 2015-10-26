@@ -89,7 +89,11 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
           @action 'respond', 503
           @end
 
-      assert @session.doc.rios
+      unless @session.doc.rios?
+        @rio.spell 'BP93'
+        @action 'hangup'
+        return
+
       rios = ({number,rio} for own number,rio of @session.doc.rios)
       index = yield get_rio_index rios
       yield @rio.play 'the_rio'
