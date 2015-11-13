@@ -24,15 +24,23 @@
 
 `provisioning` is a `nimble-direction` convention.
 
+      @session.dtmf_buffer = ''
+      @session.dtmf_min_length = 1
+      enough = =>
+        @session.dtmf_buffer.length >= @session.dtmf_min_length
+
       ctx.rio ?=
         playback: (file) =>
+          return if enough()
           sound_dir = @cfg.sound_dir ? '/opt/freeswitch/sounds'
           sound_path = @cfg.sound_path ? path.join sound_dir, 'fr', 'fr', 'sibylle'
           @action 'playback', path.join sound_path, "#{file}.wav"
         play: (file) =>
+          return if enough()
           @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{file}.wav"
 
         spell: (text) =>
+          return if enough()
           @action 'phrase', "spell,#{text}"
 
 Should we intercept on the global format (3303179) or the local format?
@@ -62,6 +70,7 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
 
       get_rio_index = seem (rios) =>
         @session.dtmf_buffer = ''
+        # FIXME set dtmf_min_length
         if rios.lengh > 1
           yield @rio.play 'welcome_internal'
           yield @rio.play 'enter_number_first'
@@ -70,10 +79,10 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
             yield @rio.spell number
             yield @rio.playback "voicemail/vm-press"
             yield @rio.playback "digits/#{i+1}"
-            yield Promise.delay 3*seconds
         else
           @session.dtmf_buffer = '1'
 
+        yield Promise.delay 3*seconds
         if @session.dtmf_buffer.length is 0
           get_rio_index()
         else
@@ -114,19 +123,26 @@ Tools to send out
 =================
 
       send_sms = seem (recipient,text) =>
+        debug 'send_sms', {recipient,text}
         yield @rio.playback 'ivr/ivr-thank_you_alt'
+        yield @action 'hangup'
 
       send_email = seem (recipient,html) =>
+        debug 'send_email', {recipient,html}
         yield @rio.playback 'ivr/ivr-thank_you_alt'
+        yield @action 'hangup'
 
       send_snailmail = seem (recipient,address) =>
+        debug 'send_snailmail', {recipient,address}
         yield @rio.playback 'ivr/ivr-thank_you_alt'
+        yield @action 'hangup'
 
 
 Destination
 ===========
 
       @session.dtmf_buffer = ''
+      @session.dtmf_min_length = 1
 
 Send via SMS
 ------------
@@ -189,4 +205,6 @@ Send via postmail
           send_snailmail @session.doc.nom, @session.doc.address_de_facturation
 
         else
+          debug 'No valid choice was made, aborting.'
           yield @rio.playback 'ivr/ivr-thank_you_alt'
+          yield @action 'hangup'
