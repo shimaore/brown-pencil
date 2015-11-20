@@ -2,13 +2,8 @@
     @name = "#{pkg.name}:appel_3179"
     debug = (require 'debug') @name
     seem = require 'seem'
-    CaringBand = require 'caring-band'
     Promise = require 'bluebird'
-    path = require 'path'
     seconds = 1000
-
-    @server_pre = ->
-      @cfg.statistics ?= new CaringBand()
 
     @include = seem (ctx) ->
 
@@ -17,31 +12,6 @@
         dialplan: @session.dialplan
         country: @session.country
         destination: @destination
-
-      @set
-        language: 'fr-FR'
-        playback_terminators: '1234567890#*'
-
-`provisioning` is a `nimble-direction` convention.
-
-      @session.dtmf_buffer = ''
-      @session.dtmf_min_length = 1
-      enough = =>
-        @session.dtmf_buffer.length >= @session.dtmf_min_length
-
-      ctx.rio ?=
-        playback: (file) =>
-          return if enough()
-          sound_dir = @cfg.sound_dir ? '/opt/freeswitch/sounds'
-          sound_path = @cfg.sound_path ? path.join sound_dir, 'fr', 'fr', 'sibylle'
-          @action 'playback', path.join sound_path, "#{file}.wav"
-        play: (file) =>
-          return if enough()
-          @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{file}.wav"
-
-        spell: (text) =>
-          return if enough()
-          @action 'phrase', "spell,#{text}"
 
 Should we intercept on the global format (3303179) or the local format?
 This needs to be global so that it works for Centrex as well.
@@ -63,22 +33,17 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
 
       @statistics.emit 'rio-request', source:@source
 
-      @call.on 'DTMF', (res) =>
-        @session.dtmf_buffer ?= ''
-        @session.dtmf_buffer += res.body['DTMF-Digit']
-        debug "dtmf_buffer = `#{@session.dtmf_buffer}`"
-
       get_rio_index = seem (rios) =>
         @session.dtmf_buffer = ''
         # FIXME set dtmf_min_length
         if rios.lengh > 1
-          yield @rio.play 'welcome_internal'
-          yield @rio.play 'enter_number_first'
+          yield @pencil.play 'welcome_internal'
+          yield @pencil.play 'enter_number_first'
           for number,rio in rios
-            yield @rio.play 'for_number'
-            yield @rio.spell number
-            yield @rio.playback "voicemail/vm-press"
-            yield @rio.playback "digits/#{i+1}"
+            yield @pencil.play 'for_number'
+            yield @pencil.spell number
+            yield @pencil.playback "voicemail/vm-press"
+            yield @pencil.playback "digits/#{i+1}"
         else
           @session.dtmf_buffer = '1'
 
@@ -106,17 +71,17 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
           @end
 
       unless @session.doc.rios?
-        @rio.spell 'BP93'
+        @pencil.spell 'BP93'
         @action 'hangup'
         return
 
       rios = ({number,rio} for own number,rio of @session.doc.rios)
       index = yield get_rio_index rios
-      yield @rio.play 'the_rio'
-      yield @rio.spell @session.number
-      yield @rio.play 'is'
-      yield @rio.spell @session.rio
-      yield @rio.play 'dont_cancel'
+      yield @pencil.play 'the_rio'
+      yield @pencil.spell @session.number
+      yield @pencil.play 'is'
+      yield @pencil.spell @session.rio
+      yield @pencil.play 'dont_cancel'
 
 
 Tools to send out
@@ -124,17 +89,17 @@ Tools to send out
 
       send_sms = seem (recipient,text) =>
         debug 'send_sms', {recipient,text}
-        yield @rio.playback 'ivr/ivr-thank_you_alt'
+        yield @pencil.playback 'ivr/ivr-thank_you_alt'
         yield @action 'hangup'
 
       send_email = seem (recipient,html) =>
         debug 'send_email', {recipient,html}
-        yield @rio.playback 'ivr/ivr-thank_you_alt'
+        yield @pencil.playback 'ivr/ivr-thank_you_alt'
         yield @action 'hangup'
 
       send_snailmail = seem (recipient,address) =>
         debug 'send_snailmail', {recipient,address}
-        yield @rio.playback 'ivr/ivr-thank_you_alt'
+        yield @pencil.playback 'ivr/ivr-thank_you_alt'
         yield @action 'hangup'
 
 
@@ -151,30 +116,30 @@ We don't have a proper list of customer mobile numbers at this time. Skip until 
 
       ###
       if @session.doc.mobile?
-        yield @rio.play 'sms_known'
-        yield @rio.spell @session.doc.mobile
-        yield @rio.playback "voicemail/vm-press"
-        yield @rio.playback "digits/1"
+        yield @pencil.play 'sms_known'
+        yield @pencil.spell @session.doc.mobile
+        yield @pencil.playback "voicemail/vm-press"
+        yield @pencil.playback "digits/1"
 
-      yield @rio.play 'sms_unknown'
-      yield @rio.playback "digits/2"
+      yield @pencil.play 'sms_unknown'
+      yield @pencil.playback "digits/2"
       ###
 
 Send via email
 --------------
 
       if @session.doc.email?
-        yield @rio.play 'email'
-        yield @rio.spell @session.doc.email
-        yield @rio.playback "voicemail/vm-press"
-        yield @rio.playback "digits/3"
+        yield @pencil.play 'email'
+        yield @pencil.spell @session.doc.email
+        yield @pencil.playback "voicemail/vm-press"
+        yield @pencil.playback "digits/3"
 
 Send via postmail
 -----------------
 
-      yield @rio.play 'snailmail'
-      yield @rio.playback "voicemail/vm-press"
-      yield @rio.playback "digits/4"
+      yield @pencil.play 'snailmail'
+      yield @pencil.playback "voicemail/vm-press"
+      yield @pencil.playback "digits/4"
 
       yield Promise.delay 10*seconds
 
@@ -188,7 +153,7 @@ Send via postmail
             send_sms @session.doc.mobile, sms_text
         when '2'
           @session.dtmf_buffer = ''
-          yield @rio.playback 'ivr/ivr-please_enter_the_phone_number'
+          yield @pencil.playback 'ivr/ivr-please_enter_the_phone_number'
           yield Promise.delay 16*seconds
           send_sms @session.dtmf_buffer, sms_text
         when '3'
@@ -206,5 +171,5 @@ Send via postmail
 
         else
           debug 'No valid choice was made, aborting.'
-          yield @rio.playback 'ivr/ivr-thank_you_alt'
+          yield @pencil.playback 'ivr/ivr-thank_you_alt'
           yield @action 'hangup'
