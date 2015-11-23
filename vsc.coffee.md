@@ -114,7 +114,7 @@ Make the change
 
 Save the change
 
-        yield @cfg.prov.put doc
+        yield @cfg.master_push doc
 
 Announce the new state
 
