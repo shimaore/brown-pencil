@@ -120,6 +120,7 @@ Save the change
 
 Announce the new state
 
+      yield @action 'answer'
       debug 'Querying', {doc}
       yield target.query.call this, doc
 
