@@ -1,5 +1,6 @@
     pkg = require './package'
     @name = "#{pkg.name}:vsc"
+    debug = (require 'debug') @name
 
     assert = require 'assert'
     seem = require 'seem'
