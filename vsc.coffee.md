@@ -38,21 +38,21 @@
 
       query_number = (what) ->
         seem (doc) ->
-          yield @pencil.playback what # 'Le renvoi sur occupation est'
+          yield @pencil.play what # 'Le renvoi sur occupation est'
           if doc["#{what}_enabled"]
-            yield @pencil.playback 'on' # 'activé'
-            yield @pencil.playback 'towards' # 'vers le numéro'
+            yield @pencil.play 'on' # 'activé'
+            yield @pencil.play 'towards' # 'vers le numéro'
             yield @pencil.spell doc["#{what}_number"]
           else
-            yield @pencil.playback 'off' # 'désactivé'
+            yield @pencil.play 'off' # 'désactivé'
 
       flip = (what) ->
         activate: (doc) -> doc[what] = true
         cancel: (doc) -> doc[what] = false
         toggle: (doc) -> doc[what] = not doc[what]
         query: seem (doc) ->
-          yield @pencil.playback what
-          yield @pencil.playback if doc[what] then 'on' else 'off'
+          yield @pencil.play what
+          yield @pencil.play if doc[what] then 'on' else 'off'
 
       target = switch d[2]
 
@@ -77,9 +77,9 @@
           query: seem (doc) ->
             yield query_number('cfnr').call this, doc
             if doc.cfnr_enabled
-              yield @pencil.playback 'after'
+              yield @pencil.play 'after'
               yield @action 'phrase', "say:#{doc.inv_time}"
-              yield @pencil.playback 'seconds'
+              yield @pencil.play 'seconds'
 
         when '21' # CFA
           activate: (doc) ->
