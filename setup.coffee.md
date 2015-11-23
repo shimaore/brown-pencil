@@ -38,7 +38,7 @@
 
       @session.dtmf_buffer = ''
       @session.dtmf_min_length = 1
-      @session.enough = =>
+      enough = @session.enough = =>
         @session.dtmf_buffer.length >= @session.dtmf_min_length
 
       @call.on 'DTMF', (res) =>
