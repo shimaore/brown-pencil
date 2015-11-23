@@ -4,8 +4,11 @@
     assert = require 'assert'
     seem = require 'seem'
 
-    f = (n) -> n.match /^([*#]{1,2})(\d\d)(?:[*](\d+))?(?:[*](\d+))?#$/
+    f = (n) -> n.match /^([*#]{1,2})(\d\d)(?:[*](\d+))?(?:[*](\d+))?#?$/
     assert f('*21#')[1] is '*'
+    assert f('#21#')[1] is '#'
+    assert f('*#21#')[1] is '*#'
+    assert f('**21#')[1] is '**'
     assert f('*21#')[2] is '21'
     assert f('*21*35#')[2] is '21'
     assert f('*21*35*89#')[2] is '21'
@@ -15,8 +18,12 @@
     @include = seem ->
       return unless @session.direction is 'egress'
 
+      debug 'Ready'
+
       d = f @destination
       return unless d
+
+      debug 'Matched', @destination
 
       action = switch d[1]
         when '*'
@@ -87,6 +94,8 @@
 
         when '31' # Privacy
           flip 'privacy'
+
+      debug 'Found', {action,target}
 
       unless action? and target?
         # FIXME play a message indicating invalid choice
