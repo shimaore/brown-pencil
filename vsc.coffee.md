@@ -75,7 +75,7 @@
           cancel: (doc) -> doc.cfnr_enabled = false
           toggle: (doc) -> doc.cfnr_enabled = not doc.cfnr_enabled
           query: seem (doc) ->
-            yield query_number('cfnr') doc
+            yield query_number('cfnr').call this, doc
             if doc.cfnr_enabled
               yield @pencil.playback 'after'
               yield @action 'phrase', "say:#{doc.inv_time}"
@@ -100,7 +100,7 @@
 
       unless action? and target?
         # FIXME play a message indicating invalid choice
-        @action 'hangup'
+        yield @action 'hangup'
         return
 
 Assume we are in a `huge-play` client/egress context, and @session.number contains the document.
@@ -120,4 +120,5 @@ Announce the new state
 
       target.query.call this, doc
 
-      @action 'hangup'
+      yield @action 'hangup'
+      return
