@@ -110,15 +110,19 @@ Assume we are in a `huge-play` client/egress context, and @session.number contai
 Make the change
 
       unless action is 'query'
+        debug 'Calling', {action,doc}
         target[action].call this, doc
 
 Save the change
 
+        debug 'Saving', {action,doc}
         yield @cfg.master_push doc
 
 Announce the new state
 
-      target.query.call this, doc
+      debug 'Querying', {doc}
+      yield target.query.call this, doc
 
+      debug 'Hangup'
       yield @action 'hangup'
       return
