@@ -37,7 +37,7 @@
           'toggle'
 
       query_number = (what) ->
-        seem (doc,what) ->
+        seem (doc) ->
           yield @pencil.playback what # 'Le renvoi sur occupation est'
           if doc["#{what}_enabled"]
             yield @pencil.playback 'on' # 'activé'
