@@ -26,8 +26,5 @@
     "caring-band": "^1.4.2",
     "debug": "^2.2.0",
     "seem": "^1.1.0"
-  },
-  "publishConfig": {
-    "tag": "development"
   }
 }
