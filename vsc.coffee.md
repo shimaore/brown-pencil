@@ -65,20 +65,20 @@
           toggle: (doc) -> doc.cfb_enabled = not doc.cfb_enabled
           query: query_number 'cfb'
 
-        when '61' # CFNR
+        when '61' # CFNR/CFDA
           activate: (doc) ->
             if d[4]?
               doc.inv_timer = parseInt d[4]
             if d[3]?
-              doc.cfnr_number = d[3]
-            doc.cfnr_enabled = true
-          cancel: (doc) -> doc.cfnr_enabled = false
-          toggle: (doc) -> doc.cfnr_enabled = not doc.cfnr_enabled
+              doc.cfnr_number = doc.cfda_number = d[3]
+            doc.cfnr_enabled = doc.cfda_enabled = true
+          cancel: (doc) -> doc.cfnr_enabled = doc.cfda_enabled = false
+          toggle: (doc) -> doc.cfnr_enabled = doc.cfda_enabled = not doc.cfnr_enabled
           query: seem (doc) ->
             yield query_number('cfnr').call this, doc
             if doc.cfnr_enabled
               yield @pencil.play 'after'
-              yield @action 'phrase', "say:#{doc.inv_time}"
+              yield @action 'phrase', "say:#{doc.inv_timer}"
               yield @pencil.play 'seconds'
 
         when '21' # CFA
