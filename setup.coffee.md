@@ -25,7 +25,7 @@
       ctx.pencil ?=
         playback: (file) =>
           return if enough()
-          sound_dir = @cfg.sound_dir ? '/opt/freeswitch/sounds'
+          sound_dir = @cfg.sound_dir ? '/opt/freeswitch/share/freeswitch/sounds'
           sound_path = @cfg.sound_path ? path.join sound_dir, 'fr', 'fr', 'sibylle'
           @action 'playback', path.join sound_path, "#{file}.wav"
         play: (file) =>
