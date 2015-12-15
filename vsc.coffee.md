@@ -78,7 +78,7 @@
             yield query_number('cfnr').call this, doc
             if doc.cfnr_enabled
               yield @pencil.play 'after'
-              yield @action 'phrase', "say:#{doc.inv_timer}"
+              yield @action 'phrase', "say-number:#{doc.inv_timer}"
               yield @pencil.play 'seconds'
 
         when '21' # CFA
