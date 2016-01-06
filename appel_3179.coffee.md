@@ -31,9 +31,14 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
       return unless @session.country is 'fr'
       return unless @destination is '3179'
 
+Prevent further processing.
+
+      @session.direction = null
+
       @statistics.emit 'rio-request', source:@source
 
       get_rio_index = seem (rios) =>
+        debug "get_rio_index", {rios}
         @session.dtmf_buffer = ''
         # FIXME set dtmf_min_length
         if rios.lengh > 1
@@ -55,7 +60,8 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
           @session.number = rios[index].number
           @session.rio = rios[index].rio
 
-      retrieve_user = ->
+      retrieve_user = (number) ->
+        debug "retrieve_user", {number}
         Promise.resolve
           rios: {
             '0972222713': 'OO Q RRRRR CCC'
@@ -65,14 +71,15 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
           addresse_de_facturation: '42 rue des Glycines\nAppt 42\n99123 Gogrville'
 
       @session.doc = yield retrieve_user @source
-        .catch (error) =>
+        .catch (error) seem =>
           @statistics.emit 'rio-failed', source:@source
-          @action 'respond', 503
+          yield @action 'respond', 503
           @end
 
       unless @session.doc.rios?
-        @pencil.spell 'BP93'
-        @action 'hangup'
+        debug 'No RIOs'
+        yield @pencil.spell 'BP93'
+        yield @action 'hangup'
         return
 
       rios = ({number,rio} for own number,rio of @session.doc.rios)
@@ -129,6 +136,7 @@ Send via email
 --------------
 
       if @session.doc.email?
+        debug 'Send via email'
         yield @pencil.play 'email'
         yield @pencil.spell @session.doc.email
         yield @pencil.playback "voicemail/vm-press"
