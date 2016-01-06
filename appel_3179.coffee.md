@@ -70,8 +70,7 @@ Prevent further processing.
           nom: 'Stéphane Test'
           addresse_de_facturation: '42 rue des Glycines\nAppt 42\n99123 Gogrville'
 
-      @session.doc = yield retrieve_user @source
-        .catch (error) seem =>
+      @session.doc = yield retrieve_user(@source).catch seem (error) =>
           @statistics.emit 'rio-failed', source:@source
           yield @action 'respond', 503
           @end
