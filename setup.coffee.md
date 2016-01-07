@@ -24,16 +24,16 @@
 
       ctx.pencil ?=
         playback: (file) =>
-          return if enough()
+          return Promise.resolve() if enough()
           sound_dir = @cfg.sound_dir ? '/opt/freeswitch/share/freeswitch/sounds'
           sound_path = @cfg.sound_path ? path.join sound_dir, 'fr', 'fr', 'sibylle'
           @action 'playback', path.join sound_path, "#{file}.wav"
         play: (file) =>
-          return if enough()
+          return Promise.resolve() if enough()
           @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{file}.wav"
 
         spell: (text) =>
-          return if enough()
+          return Promise.resolve() if enough()
           @action 'phrase', "spell,#{text}"
 
       @session.dtmf_buffer = ''
