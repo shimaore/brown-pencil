@@ -39,7 +39,7 @@ Prevent further processing.
 
       get_rio_index = seem (rios) =>
         debug "get_rio_index", {rios}
-        @session.dtmf_buffer = ''
+        @pencil.clear()
         # FIXME set dtmf_min_length
         if rios.lengh > 1
           yield @pencil.play 'welcome_internal'
@@ -59,6 +59,7 @@ Prevent further processing.
           index = parseInt(@session.dtmf_buffer)-1
           @session.number = rios[index].number
           @session.rio = rios[index].rio
+          @pencil.clear()
 
       retrieve_user = (number) ->
         debug "retrieve_user", {number}
@@ -112,8 +113,7 @@ Tools to send out
 Destination
 ===========
 
-      @session.dtmf_buffer = ''
-      @session.dtmf_min_length = 1
+      @pencil.clear 1
 
 Send via SMS
 ------------
@@ -154,12 +154,12 @@ Send via postmail
         Le RIO associé au numéro #{@session.number[0...6]}XXXX est #{@session.rio}.
       """
 
-      switch @session.dtmf_buffer
+      choice = @pencil.clear()
+      switch choice
         when '1'
           if @session.doc.mobile?
             send_sms @session.doc.mobile, sms_text
         when '2'
-          @session.dtmf_buffer = ''
           yield @pencil.playback 'ivr/ivr-please_enter_the_phone_number'
           yield Promise.delay 16*seconds
           send_sms @session.dtmf_buffer, sms_text

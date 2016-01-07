@@ -36,8 +36,14 @@
           return Promise.resolve() if enough()
           @action 'phrase', "spell,#{text}"
 
-      @session.dtmf_buffer = ''
-      @session.dtmf_min_length = 1
+        clear: (n) =>
+          if n?
+            @session.dtmf_min_length = n
+          r = @session.dtmf_buffer
+          @session.dtmf_buffer = ''
+          r
+
+      ctx.pencil.clear 1
       enough = @session.enough = =>
         @session.dtmf_buffer.length >= @session.dtmf_min_length
 
