@@ -25,6 +25,8 @@
     "bluebird": "^3.0.5",
     "caring-band": "^1.4.2",
     "debug": "^2.2.0",
-    "seem": "^1.1.1"
+    "seem": "^1.1.1",
+    "superagent": "^1.7.2",
+    "superagent-as-promised": "^3.2.1"
   }
 }

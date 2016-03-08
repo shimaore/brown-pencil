@@ -5,6 +5,8 @@
     Promise = require 'bluebird'
     seconds = 1000
 
+    request = (require 'superagent-as-promised') require 'superagent'
+
     @include = seem (ctx) ->
 
       debug 'Start',
@@ -96,6 +98,13 @@ Tools to send out
 
       send_sms = seem (recipient,text) =>
         debug 'send_sms', {recipient,text}
+
+        yield request @cfg.sms.url
+          .post '/'
+          .send
+            secret: @cfg.sms.secret
+            msg: text
+            nums: [recipient]
         yield @pencil.playback 'ivr/ivr-thank_you_alt'
         yield @action 'hangup'
 
