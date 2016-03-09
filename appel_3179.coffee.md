@@ -67,11 +67,10 @@ Prevent further processing.
         debug "retrieve_user", {number}
         Promise.resolve
           rios: {
-            '0972222713': 'OO Q RRRRR CCC'
           }
-          email: 'stephane@shimaore.net'
-          nom: 'Stéphane Test'
-          addresse_de_facturation: '42 rue des Glycines\nAppt 42\n99123 Gogrville'
+          email: ''
+          nom: ''
+          addresse_de_facturation: ''
 
       @session.doc = yield retrieve_user(@source).catch seem (error) =>
           @statistics.emit 'rio-failed', source:@source
