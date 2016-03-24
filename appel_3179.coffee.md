@@ -5,7 +5,7 @@
     Promise = require 'bluebird'
     seconds = 1000
 
-    request = (require 'superagent-as-promised') require 'superagent'
+    bucket = require 'glorious-bucket'
 
     @include = seem (ctx) ->
 
@@ -32,6 +32,8 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
       return unless @session.dialplan is 'national'
       return unless @session.country is 'fr'
       return unless @destination is '3179'
+
+      {send_sms,send_email,send_snail_mail,retrieve_user} = bucket @cfg
 
 Prevent further processing.
 
@@ -63,15 +65,6 @@ Prevent further processing.
           @session.rio = rios[index].rio
           @pencil.clear()
 
-      retrieve_user = (number) ->
-        debug "retrieve_user", {number}
-        Promise.resolve
-          rios: {
-          }
-          email: ''
-          nom: ''
-          addresse_de_facturation: ''
-
       @session.doc = yield retrieve_user(@source).catch seem (error) =>
           @statistics.emit 'rio-failed', source:@source
           yield @action 'respond', 503
@@ -92,32 +85,6 @@ Prevent further processing.
       yield @pencil.play 'dont_cancel'
 
 
-Tools to send out
-=================
-
-      send_sms = seem (recipient,text) =>
-        debug 'send_sms', {recipient,text}
-
-        yield request @cfg.sms.url
-          .post '/'
-          .send
-            secret: @cfg.sms.secret
-            msg: text
-            nums: [recipient]
-        yield @pencil.playback 'ivr/ivr-thank_you_alt'
-        yield @action 'hangup'
-
-      send_email = seem (recipient,html) =>
-        debug 'send_email', {recipient,html}
-        yield @pencil.playback 'ivr/ivr-thank_you_alt'
-        yield @action 'hangup'
-
-      send_snailmail = seem (recipient,address) =>
-        debug 'send_snailmail', {recipient,address}
-        yield @pencil.playback 'ivr/ivr-thank_you_alt'
-        yield @action 'hangup'
-
-
 Destination
 ===========
 
@@ -126,9 +93,6 @@ Destination
 Send via SMS
 ------------
 
-We don't have a proper list of customer mobile numbers at this time. Skip until we can provide this.
-
-      ###
       if @session.doc.mobile?
         yield @pencil.play 'sms_known'
         yield @pencil.spell @session.doc.mobile
@@ -137,7 +101,6 @@ We don't have a proper list of customer mobile numbers at this time. Skip until 
 
       yield @pencil.play 'sms_unknown'
       yield @pencil.playback "digits/2"
-      ###
 
 Send via email
 --------------
@@ -166,25 +129,18 @@ Send via postmail
       switch choice
         when '1'
           if @session.doc.mobile?
-            send_sms @session.doc.mobile, sms_text
+            yield send_sms @session.doc.mobile, sms_text
         when '2'
           yield @pencil.playback 'ivr/ivr-please_enter_the_phone_number'
           yield Promise.delay 16*seconds
-          send_sms @session.dtmf_buffer, sms_text
+          yield send_sms @session.dtmf_buffer, sms_text
         when '3'
-          send_email @session.doc.email, """
-            <p>
-            Veuillez trouver ci-dessous la liste des RIO fixes associés à votre compte.
-            </p>
-            <table>
-              <tr><th>Numéro de téléphone</th><th>RIO</th></tr>
-              #{ ["<tr><td> #{e.number} </td><td> #{e.rio} </td></tr>\n" for e in rios].join '' }
-            </table>
-          """
+          yield send_email @session.doc.email, rios
         when '4'
-          send_snailmail @session.doc.nom, @session.doc.address_de_facturation
+          yield send_snailmail @session.doc.nom, @session.doc.address_de_facturation, rios
 
         else
           debug 'No valid choice was made, aborting.'
-          yield @pencil.playback 'ivr/ivr-thank_you_alt'
-          yield @action 'hangup'
+
+      yield @pencil.playback 'ivr/ivr-thank_you_alt'
+      yield @action 'hangup'
