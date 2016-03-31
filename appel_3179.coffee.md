@@ -65,10 +65,18 @@ Prevent further processing.
           @session.rio = rios[index].rio
           @pencil.clear()
 
-      @session.doc = yield retrieve_user(@source).catch seem (error) =>
+      debug 'retrieve user', @source
+
+      @session.doc = yield retrieve_user(@source)
+        .catch seem (error) =>
+          debug "retrieve user: #{error.stack ? error}"
           @statistics.emit 'rio-failed', source:@source
           yield @action 'respond', 503
           @end
+          null
+
+      debug 'retrieve user returned', @session.doc
+      return unless @session.doc?
 
       unless @session.doc.rios?
         debug 'No RIOs'
