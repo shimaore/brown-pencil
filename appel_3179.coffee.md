@@ -7,7 +7,7 @@
 
     bucket = require 'glorious-bucket'
 
-    @include = seem (ctx) ->
+    @include = seem ->
 
       debug 'Start',
         direction: @session.direction
