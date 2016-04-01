@@ -52,7 +52,7 @@ Prevent further processing.
           debug 'Listing RIOs'
           @session.dtmf_buffer = ''
           yield @pencil.play 'enter_number_first'
-          for v,i in rios
+          for v,i in rios when v.rio?
             debug 'get_rio_index record', i,v
             yield @pencil.play 'for_number'
             yield @pencil.spell v.number
@@ -113,11 +113,13 @@ Send via SMS
 ------------
 
       if @session.doc.mobile?
+        debug 'Announce mobile', @session.doc.mobile
         yield @pencil.play 'sms_known'
         yield @pencil.spell @session.doc.mobile
         yield @pencil.playback "voicemail/vm-press"
         yield @pencil.playback "digits/1"
 
+      debug 'Announce mobile query'
       yield @pencil.play 'sms_unknown'
       yield @pencil.playback "voicemail/vm-press"
       yield @pencil.playback "digits/2"
@@ -126,7 +128,7 @@ Send via email
 --------------
 
       if @session.doc.email?
-        debug 'Send via email'
+        debug 'Announce email'
         yield @pencil.play 'email'
         yield @pencil.spell @session.doc.email
         yield @pencil.playback "voicemail/vm-press"
@@ -135,6 +137,7 @@ Send via email
 Send via postmail
 -----------------
 
+      debug 'Announce snailmail'
       yield @pencil.play 'snailmail'
       yield @pencil.playback "voicemail/vm-press"
       yield @pencil.playback "digits/4"
@@ -153,14 +156,19 @@ Send via postmail
         when '2'
           yield @pencil.playback 'ivr/ivr-please_enter_the_phone_number'
           yield Promise.delay 16*seconds
-          yield send_sms @session.dtmf_buffer, sms_text
+          number = @session.dtmf_buffer.replace /[^\d]/, ''
+          yield send_sms number, sms_text
+            .catch (error) ->
+              debug "Send SMS #{error.stack ? error}", number
         when '3'
-          yield send_email @session.doc.email, rios
+          if @session.doc.email?
+            yield send_email @session.doc.email, rios
         when '4'
           yield send_snailmail @session.doc.nom, @session.doc.address_de_facturation, rios
 
         else
           debug 'No valid choice was made, aborting.'
 
+      debug 'Thank you.'
       yield @pencil.playback 'ivr/ivr-thank_you_alt'
       yield @action 'hangup'
