@@ -45,12 +45,14 @@ Prevent further processing.
         debug "get_rio_index", {rios}
         @pencil.clear()
         # FIXME set dtmf_min_length
+        debug 'get_rio_index length', rios.length
         if rios.lengh > 1
           yield @pencil.play 'welcome_internal'
           yield @pencil.play 'enter_number_first'
-          for number,rio in rios
+          for v,i in rios
+            debug 'get_rio_index record', v
             yield @pencil.play 'for_number'
-            yield @pencil.spell number
+            yield @pencil.spell v.number
             yield @pencil.playback "voicemail/vm-press"
             yield @pencil.playback "digits/#{i+1}"
         else
