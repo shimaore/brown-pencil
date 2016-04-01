@@ -148,20 +148,23 @@ Send via postmail
         Le RIO associé au numéro #{@session.number[0...6]}XXXX est #{@session.rio}.
       """
 
+      clean_number = (number) ->
+        number = number.replace /[^\d]/, ''
+        number = "33#{number.substr 1}" if number[0] is '0'
+        number
+
       choice = @pencil.clear()
       switch choice
         when '1'
           if @session.doc.mobile?
-            number = @session.doc.mobile
-            number = "33#{number}" if number[0] is 0
+            number = clean_number @session.doc.mobile
             yield send_sms number, sms_text
               .catch (error) ->
                 debug "Send SMS #{error.stack ? error}", number
         when '2'
           yield @pencil.playback 'ivr/ivr-please_enter_the_phone_number'
           yield Promise.delay 16*seconds
-          number = @session.dtmf_buffer.replace /[^\d]/, ''
-          number = "33#{number}" if number[0] is 0
+          number = clean_number @session.dtmf_buffer
           yield send_sms number, sms_text
             .catch (error) ->
               debug "Send SMS #{error.stack ? error}", number
