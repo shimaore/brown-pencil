@@ -152,11 +152,16 @@ Send via postmail
       switch choice
         when '1'
           if @session.doc.mobile?
-            yield send_sms @session.doc.mobile, sms_text
+            number = @session.doc.mobile
+            number = "33#{number}" if number[0] is 0
+            yield send_sms number, sms_text
+              .catch (error) ->
+                debug "Send SMS #{error.stack ? error}", number
         when '2'
           yield @pencil.playback 'ivr/ivr-please_enter_the_phone_number'
           yield Promise.delay 16*seconds
           number = @session.dtmf_buffer.replace /[^\d]/, ''
+          number = "33#{number}" if number[0] is 0
           yield send_sms number, sms_text
             .catch (error) ->
               debug "Send SMS #{error.stack ? error}", number
