@@ -171,4 +171,5 @@ Send via postmail
 
       debug 'Thank you.'
       yield @pencil.playback 'ivr/ivr-thank_you_alt'
+      yield Promise.delay 3*seconds
       yield @action 'hangup'
