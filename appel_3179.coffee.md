@@ -41,6 +41,8 @@ Prevent further processing.
 
       @statistics.emit 'rio-request', source:@source
 
+      yield @pencil.play 'welcome_internal'
+
       get_rio_index = seem (rios) =>
         debug "get_rio_index", {rios}
         @pencil.clear()
@@ -48,7 +50,6 @@ Prevent further processing.
         debug 'get_rio_index length', rios.length
         if rios.lengh > 1
           @session.dtmf_buffer = ''
-          yield @pencil.play 'welcome_internal'
           yield @pencil.play 'enter_number_first'
           for v,i in rios
             debug 'get_rio_index record', v
