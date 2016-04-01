@@ -49,21 +49,24 @@ Prevent further processing.
         # FIXME set dtmf_min_length
         debug 'get_rio_index length', rios.length
         if rios.lengh > 1
+          debug 'Listing RIOs'
           @session.dtmf_buffer = ''
           yield @pencil.play 'enter_number_first'
           for v,i in rios
-            debug 'get_rio_index record', v
+            debug 'get_rio_index record', i,v
             yield @pencil.play 'for_number'
             yield @pencil.spell v.number
             yield @pencil.playback "voicemail/vm-press"
             yield @pencil.playback "digits/#{i+1}"
         else
+          debug 'Only one RIO available'
           @session.dtmf_buffer = '1'
 
         yield Promise.delay 3*seconds
         if @session.dtmf_buffer.length is 0
           get_rio_index()
         else
+          debug 'User selection', @session.dtmf_buffer
           index = parseInt(@session.dtmf_buffer)-1
           @session.number = rios[index].number
           @session.rio = rios[index].rio
