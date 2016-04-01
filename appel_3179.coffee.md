@@ -48,7 +48,7 @@ Prevent further processing.
         @pencil.clear()
         # FIXME set dtmf_min_length
         debug 'get_rio_index length', rios.length
-        if rios.lengh > 1
+        if rios.length > 1
           debug 'Listing RIOs'
           @session.dtmf_buffer = ''
           yield @pencil.play 'enter_number_first'
