@@ -91,6 +91,9 @@ Prevent further processing.
 
       rios = ({number,rio} for own number,rio of @session.doc.rios)
       index = yield get_rio_index rios
+        .catch (error) ->
+          debug "get_rio_index failed #{error.stack ? error}"
+          get_rio_index rios
       yield @pencil.play 'the_rio'
       yield @pencil.spell @session.number
       yield @pencil.play 'is'
