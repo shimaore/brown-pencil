@@ -47,6 +47,7 @@ Prevent further processing.
         # FIXME set dtmf_min_length
         debug 'get_rio_index length', rios.length
         if rios.lengh > 1
+          @session.dtmf_buffer = ''
           yield @pencil.play 'welcome_internal'
           yield @pencil.play 'enter_number_first'
           for v,i in rios
@@ -66,6 +67,7 @@ Prevent further processing.
           @session.number = rios[index].number
           @session.rio = rios[index].rio
           @pencil.clear()
+          return index
 
       debug 'retrieve user', @source
 
@@ -110,6 +112,7 @@ Send via SMS
         yield @pencil.playback "digits/1"
 
       yield @pencil.play 'sms_unknown'
+      yield @pencil.playback "voicemail/vm-press"
       yield @pencil.playback "digits/2"
 
 Send via email
