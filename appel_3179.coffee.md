@@ -172,7 +172,7 @@ Send via postmail
           if @session.doc.email?
             yield send_email @session.doc.email, rios
         when '4'
-          yield send_snailmail @session.doc.nom, @session.doc.address_de_facturation, rios
+          yield send_snailmail @session.doc.nom, @session.doc.adresse_de_facturation, rios
 
         else
           debug 'No valid choice was made, aborting.'
