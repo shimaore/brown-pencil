@@ -168,11 +168,18 @@ Send via postmail
           yield send_sms number, sms_text
             .catch (error) ->
               debug "Send SMS #{error.stack ? error}", number
+              yield @pencil.spell 'BP171'
         when '3'
           if @session.doc.email?
             yield send_email @session.doc.email, rios
+              .catch (error) ->
+                debug "Send email #{error.stack ? error}"
+                yield @pencil.spell 'BP177'
         when '4'
           yield send_snailmail @session.doc.nom, @session.doc.adresse_de_facturation, rios
+            .catch (error) ->
+              debug "Send snail mail #{error.stack ? error}"
+              yield @pencil.spell 'BP182'
 
         else
           debug 'No valid choice was made, aborting.'
