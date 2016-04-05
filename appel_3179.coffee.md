@@ -33,7 +33,7 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
       return unless @session.country is 'fr'
       return unless @destination is '3179'
 
-      {send_sms,send_email,send_snail_mail,retrieve_user} = bucket @cfg
+      {send_sms,send_email,send_snailmail,retrieve_user} = bucket @cfg
 
 Prevent further processing.
 
