@@ -65,6 +65,8 @@
           toggle: (doc) -> doc.cfb_enabled = not doc.cfb_enabled
           query: query_number 'cfb'
 
+* doc.local_number.inv_timer (integer) Time before CFNR (No Answer) forwarding is applied.
+
         when '61' # CFNR/CFDA
           activate: (doc) ->
             if d[4]?
