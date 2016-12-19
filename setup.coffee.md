@@ -10,30 +10,32 @@
 
     @include = (ctx) ->
 
-      debug 'Start',
-        direction: @session.direction
-        dialplan: @session.dialplan
-        country: @session.country
-        destination: @destination
+      debug 'Start'
 
-      @set
-        language: 'fr-FR'
-        playback_terminators: '1234567890#*'
+      init = seem =>
+        return if @session.dtmf_init
+        yield @set
+          language: 'fr-FR'
+          playback_terminators: '1234567890#*'
+        @session.dtmf_init = true
 
 `provisioning` is a `nimble-direction` convention.
 
       ctx.pencil ?=
-        playback: (file) =>
-          return Promise.resolve() if enough()
+        playback: seem (file) =>
+          return if enough()
+          yield init()
           sound_dir = @cfg.sound_dir ? '/opt/freeswitch/share/freeswitch/sounds'
           sound_path = @cfg.sound_path ? path.join sound_dir, 'fr', 'fr', 'sibylle'
           @action 'playback', path.join sound_path, "#{file}.wav"
-        play: (file) =>
-          return Promise.resolve() if enough()
+        play: seem (file) =>
+          return if enough()
+          yield init()
           @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{file}.wav"
 
-        spell: (text) =>
-          return Promise.resolve() if enough()
+        spell: seem (text) =>
+          return if enough()
+          yield init()
           @action 'phrase', "spell,#{text}"
 
         clear: (n) =>
