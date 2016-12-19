@@ -5,7 +5,7 @@
     Promise = require 'bluebird'
     seconds = 1000
 
-    bucket = require 'glorious-bucket'
+    bucket = try require 'glorious-bucket'
 
     @include = seem ->
 
