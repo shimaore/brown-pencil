@@ -18,6 +18,7 @@
 
     @include = seem ->
       return unless @session.direction is 'egress'
+      return if @session.forwarding is true
 
       debug 'Ready'
 
