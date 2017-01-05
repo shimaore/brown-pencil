@@ -9,12 +9,6 @@
 
     @include = seem ->
 
-      debug 'Start',
-        direction: @session.direction
-        dialplan: @session.dialplan
-        country: @session.country
-        destination: @destination
-
 Should we intercept on the global format (3303179) or the local format?
 This needs to be global so that it works for Centrex as well.
 
@@ -32,6 +26,14 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
       return unless @session.dialplan is 'national'
       return unless @session.country is 'fr'
       return unless @destination is '3179'
+
+      return if @session.forwarding is true
+
+      debug 'Start',
+        direction: @session.direction
+        dialplan: @session.dialplan
+        country: @session.country
+        destination: @destination
 
       {send_sms,send_email,send_snailmail,retrieve_user} = bucket @cfg
 
