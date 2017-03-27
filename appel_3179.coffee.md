@@ -2,8 +2,11 @@
     @name = "#{pkg.name}:appel_3179"
     debug = (require 'debug') @name
     seem = require 'seem'
-    Promise = require 'bluebird'
     seconds = 1000
+
+    sleep = (timeout) ->
+      new Promise (resolve) ->
+        setTimeout resolve, timeout
 
     bucket = try require 'glorious-bucket'
 
@@ -39,20 +42,19 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
 
 Prevent further processing.
 
-      @session.direction = null
+      @direction 'rio-request'
 
       @statistics.emit 'rio-request', source:@source
 
+      yield @action 'answer'
       yield @pencil.play 'welcome_internal'
 
       get_rio_index = seem (rios) =>
         debug "get_rio_index", {rios}
-        @pencil.clear()
-        # FIXME set dtmf_min_length
+        @dtmf.clear()
         debug 'get_rio_index length', rios.length
         if rios.length > 1
           debug 'Listing RIOs'
-          @session.dtmf_buffer = ''
           yield @pencil.play 'enter_number_first'
           for v,i in rios when v.rio?
             debug 'get_rio_index record', i,v
@@ -60,20 +62,19 @@ Prevent further processing.
             yield @pencil.spell v.number
             yield @pencil.playback "voicemail/vm-press"
             yield @pencil.playback "digits/#{i+1}"
+          buffer = yield @dtmf.expect 1, rios.length.toString().length
         else
           debug 'Only one RIO available'
-          @session.dtmf_buffer = '1'
+          buffer = '1'
 
-        yield Promise.delay 3*seconds
-        if @session.dtmf_buffer.length is 0
-          get_rio_index()
+        if buffer.length is 0
+          yield get_rio_index rios
         else
-          debug 'User selection', @session.dtmf_buffer
-          index = parseInt(@session.dtmf_buffer)-1
-          @session.number = rios[index].number
+          debug 'User selection', buffer
+          index = parseInt(buffer)-1
+          @session.rio_number = rios[index].number
           @session.rio = rios[index].rio
-          @pencil.clear()
-          return index
+        return
 
       debug 'retrieve user', @source
 
@@ -82,7 +83,7 @@ Prevent further processing.
           debug "retrieve user: #{error.stack ? error}"
           @statistics.emit 'rio-failed', source:@source
           yield @action 'respond', 503
-          @end
+          @direction 'rio-failed'
           null
 
       debug 'retrieve user returned', @session.doc
@@ -95,12 +96,13 @@ Prevent further processing.
         return
 
       rios = ({number,rio} for own number,rio of @session.doc.rios)
-      index = yield get_rio_index rios
+      yield get_rio_index rios
         .catch (error) ->
           debug "get_rio_index failed #{error.stack ? error}"
           get_rio_index rios
+
       yield @pencil.play 'the_rio'
-      yield @pencil.spell @session.number
+      yield @pencil.spell @session.rio_number
       yield @pencil.play 'is'
       yield @pencil.spell @session.rio
       yield @pencil.play 'dont_cancel'
@@ -109,7 +111,7 @@ Prevent further processing.
 Destination
 ===========
 
-      @pencil.clear 1
+      @dtmf.clear()
 
 Send via SMS
 ------------
@@ -144,10 +146,8 @@ Send via postmail
       yield @pencil.playback "voicemail/vm-press"
       yield @pencil.playback "digits/4"
 
-      yield Promise.delay 10*seconds
-
       sms_text = """
-        Le RIO associé au numéro #{@session.number[0...6]}XXXX est #{@session.rio}.
+        Le RIO associé au numéro #{@session.rio_number[0...6]}XXXX est #{@session.rio}.
       """
 
       clean_number = (number) ->
@@ -155,8 +155,9 @@ Send via postmail
         number = "33#{number.substr 1}" if number[0] is '0'
         number
 
-      choice = @pencil.clear()
-      switch choice
+      yield @pencil.playback "silence_stream://10000"
+
+      switch yield @dtmf.expect 1, 1
         when '1'
           if @session.doc.mobile?
             number = clean_number @session.doc.mobile
@@ -164,9 +165,9 @@ Send via postmail
               .catch (error) ->
                 debug "Send SMS #{error.stack ? error}", number
         when '2'
+          @dtmf.clear()
           yield @pencil.playback 'ivr/ivr-please_enter_the_phone_number'
-          yield Promise.delay 16*seconds
-          number = clean_number @session.dtmf_buffer
+          number = clean_number yield @dtmf.expect 10, 10
           yield send_sms number, sms_text
             .catch (error) ->
               debug "Send SMS #{error.stack ? error}", number
@@ -188,5 +189,5 @@ Send via postmail
 
       debug 'Thank you.'
       yield @pencil.playback 'ivr/ivr-thank_you_alt'
-      yield Promise.delay 3*seconds
+      yield sleep 3*seconds
       yield @action 'hangup'
