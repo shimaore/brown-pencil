@@ -1,15 +1,11 @@
     pkg = require './package'
     @name = "#{pkg.name}:setup"
-    debug = (require 'debug') @name
     seem = require 'seem'
-    CaringBand = require 'caring-band'
     path = require 'path'
 
-    @server_pre = ->
-      @cfg.statistics ?= new CaringBand()
     @include = ->
 
-      debug 'Start'
+      @debug 'Start'
 
       init_done = false
       init = seem =>

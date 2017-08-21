@@ -1,6 +1,5 @@
     pkg = require './package'
     @name = "#{pkg.name}:appel_3179"
-    debug = (require 'debug') @name
     seem = require 'seem'
     seconds = 1000
 
@@ -11,6 +10,10 @@
     bucket = try require 'glorious-bucket'
 
     @include = seem ->
+
+      unless bucket?
+        @debug.dev 'Missing glorious-bucket'
+        return
 
 Should we intercept on the global format (3303179) or the local format?
 This needs to be global so that it works for Centrex as well.
@@ -32,7 +35,7 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
 
       return if @session.forwarding is true
 
-      debug 'Start',
+      @debug 'Start',
         direction: @session.direction
         dialplan: @session.dialplan
         country: @session.country
@@ -44,53 +47,53 @@ Prevent further processing.
 
       @direction 'rio-request'
 
-      @statistics.emit 'rio-request', source:@source
+      @report state:'rio-request', source:@source
 
       yield @action 'answer'
       yield @pencil.play 'welcome_internal'
 
       get_rio_index = seem (rios) =>
-        debug "get_rio_index", {rios}
+        @debug "get_rio_index", {rios}
         @dtmf.clear()
-        debug 'get_rio_index length', rios.length
+        @debug 'get_rio_index length', rios.length
         if rios.length > 1
-          debug 'Listing RIOs'
+          @debug 'Listing RIOs'
           yield @pencil.play 'enter_number_first'
           for v,i in rios when v.rio?
-            debug 'get_rio_index record', i,v
+            @debug 'get_rio_index record', i,v
             yield @pencil.play 'for_number'
             yield @pencil.spell v.number
             yield @pencil.playback "voicemail/vm-press"
             yield @pencil.playback "digits/#{i+1}"
           buffer = yield @dtmf.expect 1, rios.length.toString().length
         else
-          debug 'Only one RIO available'
+          @debug 'Only one RIO available'
           buffer = '1'
 
         if buffer.length is 0
           yield get_rio_index rios
         else
-          debug 'User selection', buffer
+          @debug 'User selection', buffer
           index = parseInt(buffer)-1
           @session.rio_number = rios[index].number
           @session.rio = rios[index].rio
         return
 
-      debug 'retrieve user', @source
+      @debug 'retrieve user', @source
 
       @session.doc = yield retrieve_user(@source)
         .catch seem (error) =>
-          debug "retrieve user: #{error.stack ? error}"
-          @statistics.emit 'rio-failed', source:@source
+          @debug.dev "retrieve user: #{error.stack ? error}"
+          @report state:'rio-failed', source:@source
           yield @action 'respond', 503
           @direction 'rio-failed'
           null
 
-      debug 'retrieve user returned', @session.doc
+      @debug 'retrieve user returned', @session.doc
       return unless @session.doc?
 
       unless @session.doc.rios?
-        debug 'No RIOs'
+        @debug 'No RIOs'
         yield @pencil.spell 'BP93'
         yield @action 'hangup'
         return
@@ -98,7 +101,7 @@ Prevent further processing.
       rios = ({number,rio} for own number,rio of @session.doc.rios)
       yield get_rio_index rios
         .catch (error) ->
-          debug "get_rio_index failed #{error.stack ? error}"
+          @debug.dev "get_rio_index failed #{error.stack ? error}"
           get_rio_index rios
 
       yield @pencil.play 'the_rio'
@@ -117,13 +120,13 @@ Send via SMS
 ------------
 
       if @session.doc.mobile?
-        debug 'Announce mobile', @session.doc.mobile
+        @debug 'Announce mobile', @session.doc.mobile
         yield @pencil.play 'sms_known'
         yield @pencil.spell @session.doc.mobile
         yield @pencil.playback "voicemail/vm-press"
         yield @pencil.playback "digits/1"
 
-      debug 'Announce mobile query'
+      @debug 'Announce mobile query'
       yield @pencil.play 'sms_unknown'
       yield @pencil.playback "voicemail/vm-press"
       yield @pencil.playback "digits/2"
@@ -132,7 +135,7 @@ Send via email
 --------------
 
       if @session.doc.email?
-        debug 'Announce email'
+        @debug 'Announce email'
         yield @pencil.play 'email'
         yield @pencil.spell @session.doc.email
         yield @pencil.playback "voicemail/vm-press"
@@ -141,7 +144,7 @@ Send via email
 Send via postmail
 -----------------
 
-      debug 'Announce snailmail'
+      @debug 'Announce snailmail'
       yield @pencil.play 'snailmail'
       yield @pencil.playback "voicemail/vm-press"
       yield @pencil.playback "digits/4"
@@ -162,32 +165,33 @@ Send via postmail
           if @session.doc.mobile?
             number = clean_number @session.doc.mobile
             yield send_sms number, sms_text
-              .catch (error) ->
-                debug "Send SMS #{error.stack ? error}", number
+              .catch (error) =>
+                @debug.dev "Send SMS #{error.stack ? error}", number
+                yield @pencil.spell 'BP167'
         when '2'
           @dtmf.clear()
           yield @pencil.playback 'ivr/ivr-please_enter_the_phone_number'
           number = clean_number yield @dtmf.expect 10, 10
           yield send_sms number, sms_text
-            .catch (error) ->
-              debug "Send SMS #{error.stack ? error}", number
+            .catch (error) =>
+              @debug "Send SMS #{error.stack ? error}", number
               yield @pencil.spell 'BP171'
         when '3'
           if @session.doc.email?
             yield send_email @session.doc.email, rios
-              .catch (error) ->
-                debug "Send email #{error.stack ? error}"
+              .catch (error) =>
+                @debug "Send email #{error.stack ? error}"
                 yield @pencil.spell 'BP177'
         when '4'
           yield send_snailmail @session.doc.nom, @session.doc.adresse_de_facturation, rios
-            .catch (error) ->
-              debug "Send snail mail #{error.stack ? error}"
+            .catch (error) =>
+              @debug "Send snail mail #{error.stack ? error}"
               yield @pencil.spell 'BP182'
 
         else
-          debug 'No valid choice was made, aborting.'
+          @debug 'No valid choice was made, aborting.'
 
-      debug 'Thank you.'
+      @debug 'Thank you.'
       yield @pencil.playback 'ivr/ivr-thank_you_alt'
       yield sleep 3*seconds
       yield @action 'hangup'

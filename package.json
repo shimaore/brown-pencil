@@ -1,7 +1,7 @@
 {
   "name": "brown-pencil",
   "version": "4.0.0",
-  "description": "RIO voice server",
+  "description": "RIO voice server, Vertical Service Codes (VSC)",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -18,16 +18,14 @@
   "author": "Stéphane Alnet <stephane@shimaore.net> (http://stephane.shimaore.net/)",
   "license": "Unlicense (http://unlicense.org/)",
   "devDependencies": {
-    "coffee-script": "^1.11.1",
-    "mocha": "^3.1.2"
+    "coffee-script": "^1.12.7",
+    "mocha": "^3.5.0"
   },
   "dependencies": {
-    "caring-band": "^1.4.3",
-    "debug": "^2.2.0",
-    "moment-timezone": "^0.5.10",
+    "moment-timezone": "^0.5.13",
     "seem": "^2.0.0"
   },
-  "peerDependencies": {
-    "glorious-bucket": "^3.1.7"
+  "optionalDependencies": {
+    "glorious-bucket": "^3.1.9"
   }
 }

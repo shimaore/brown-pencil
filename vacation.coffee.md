@@ -1,6 +1,5 @@
     pkg = require './package'
     @name = "#{pkg.name}:vacation"
-    debug = (require 'debug') @name
 
     assert = require 'assert'
     seem = require 'seem'
@@ -11,10 +10,10 @@
     @include = seem ->
       return unless @session.direction is 'egress'
 
-      debug 'Ready'
+      @debug 'Ready'
 
       is_on_vacation = seem (vacation) =>
-        debug 'is_on_vacation'
+        @debug 'is_on_vacation'
 
 Vacation settings
 
@@ -74,6 +73,6 @@ Assume we are in a `huge-play` client/egress context, and @session.number contai
 
       if yield is_on_vacation @session.number.vacation
         @session.direction = 'vacation'
-        debug 'Hangup'
+        @debug 'Hangup'
         yield @action 'hangup'
         return

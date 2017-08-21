@@ -1,6 +1,5 @@
     pkg = require './package'
     @name = "#{pkg.name}:vsc"
-    debug = (require 'debug') @name
 
     assert = require 'assert'
     seem = require 'seem'
@@ -20,12 +19,12 @@
       return unless @session.direction is 'egress'
       return if @session.forwarding is true
 
-      debug 'Ready'
+      @debug 'Ready'
 
       d = f @destination
       return unless d
 
-      debug 'Matched', @destination
+      @debug 'Matched', @destination
 
       action = switch d[1]
         when '*'
@@ -99,7 +98,7 @@
         when '31' # Privacy
           flip 'privacy'
 
-      debug 'Found', {action,target}
+      @debug 'Found', {action,target}
 
       unless action? and target?
         # FIXME play a message indicating invalid choice
@@ -113,20 +112,20 @@ Assume we are in a `huge-play` client/egress context, and @session.number contai
 Make the change
 
       unless action is 'query'
-        debug 'Calling', {action,doc}
+        @debug 'Calling', {action,doc}
         target[action].call this, doc
 
 Save the change
 
-        debug 'Saving', {action,doc}
+        @debug 'Saving', {action,doc}
         yield @cfg.master_push doc
 
 Announce the new state
 
       yield @action 'answer'
-      debug 'Querying', {doc}
+      @debug 'Querying', {doc}
       yield target.query.call this, doc
 
-      debug 'Hangup'
+      @debug 'Hangup'
       yield @action 'hangup'
       return
