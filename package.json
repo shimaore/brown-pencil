@@ -1,6 +1,6 @@
 {
   "name": "brown-pencil",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "RIO voice server, Vertical Service Codes (VSC)",
   "main": "index.js",
   "directories": {
