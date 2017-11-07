@@ -15,6 +15,13 @@
     assert f('*21*35#')[3] is '35'
     assert f('*21*35*89#')[4] is '89'
 
+References
+----------
+
+- ETSI/HF: https://portal.etsi.org/TBSiteMap/HF/hfservicecodes.aspx
+- MMI procedures of https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=570 , code in Annex B (themselves based on ETSI/HF and ITU-T E.131)
+- https://en.wikipedia.org/wiki/Call_forwarding#Europe
+
     @include = seem ->
       return unless @session.direction is 'egress'
       return if @session.forwarding is true
@@ -34,7 +41,9 @@
         when '*#'
           'query'
         when '**'
-          'toggle'
+          'toggle' # 3GPP 'registration'
+
+3GPP also supports '##' for 'erasure'
 
       query_number = (what) ->
         seem (doc) ->
@@ -56,7 +65,9 @@
 
       target = switch d[2]
 
-        when '69' # CFB
+CF Busy is 67 for 3GPP and ETSI
+
+        when '69', '67' # CFB
           activate: (doc) ->
             if d[3]?
               doc.cfb_number = d[3]
@@ -67,7 +78,9 @@
 
 * doc.local_number.inv_timer (integer) Time before CFNR (No Answer) forwarding is applied.
 
-        when '61' # CFNR/CFDA
+ETSI, 3GPP use 61 for CFDA (No Reply), 62 for CFNR (Not Reachable)
+
+        when '61', '62' # CFNR/CFDA
           activate: (doc) ->
             if d[4]?
               doc.inv_timer = parseInt d[4]
@@ -83,6 +96,8 @@
               yield @action 'phrase', "say-number:#{doc.inv_timer}"
               yield @pencil.play 'seconds'
 
+ETSI Call Forwarding, Unconditional to any number; 3GPP CFU
+
         when '21' # CFA
           activate: (doc) ->
             if d[3]?
@@ -92,11 +107,22 @@
           toggle: (doc) -> doc.cfa_enabled = not doc.cfa_enabled
           query: query_number 'cfa'
 
-        when '82' # Reject Anonymous
+ETSI: 934 (CLIR) 935 (no CLIP)
+NANPA: 77
+
+        when '82', '934', '935' # Reject Anonymous
           flip 'reject_anonymous'
+
+ETSI 31 (CLIR)
 
         when '31' # Privacy
           flip 'privacy'
+
+ETSI 26 (announcement), 49 (in hunt group)
+NANPA: 78 and 79
+
+        when '26' # DND
+          flip 'dnd'
 
       @debug 'Found', {action,target}
 
