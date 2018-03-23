@@ -28,6 +28,12 @@ References
 
       @debug 'Ready'
 
+      {VOICEMAIL} = @session
+
+Make sure we don't match (in case @session.VOICEMAIL was not defined properly).
+
+      VOICEMAIL ?= 'vm'
+
       d = f @destination
       return unless d
 
@@ -50,8 +56,11 @@ References
           yield @pencil.play what # 'Le renvoi sur occupation est'
           if doc["#{what}_enabled"]
             yield @pencil.play 'on' # 'activé'
-            yield @pencil.play 'towards' # 'vers le numéro'
-            yield @pencil.spell doc["#{what}_number"]
+            if doc["#{what}_voicemail"]
+              yield @pencil.play 'towards-voicemail' # 'vers la messagerie'
+            else
+              yield @pencil.play 'towards' # 'vers le numéro'
+              yield @pencil.spell doc["#{what}_number"]
           else
             yield @pencil.play 'off' # 'désactivé'
 
@@ -70,7 +79,11 @@ CF Busy is 67 for 3GPP and ETSI
         when '69', '67' # CFB
           activate: (doc) ->
             if d[3]?
-              doc.cfb_number = d[3]
+              if d[3] is VOICEMAIL
+                doc.cfb_voicemail = true
+              else
+                doc.cfb_voicemail = false
+                doc.cfb_number = d[3]
             doc.cfb_enabled = true
           cancel: (doc) -> doc.cfb_enabled = false
           toggle: (doc) -> doc.cfb_enabled = not doc.cfb_enabled
@@ -85,7 +98,11 @@ ETSI, 3GPP use 61 for CFDA (No Reply), 62 for CFNR (Not Reachable)
             if d[4]?
               doc.inv_timer = parseInt d[4]
             if d[3]?
-              doc.cfnr_number = doc.cfda_number = d[3]
+              if d[3] is VOICEMAIL
+                doc.cfnr_voicemail = doc.cfda_voicemail = true
+              else
+                doc.cfnr_voicemail = doc.cfda_voicemail = false
+                doc.cfnr_number = doc.cfda_number = d[3]
             doc.cfnr_enabled = doc.cfda_enabled = true
           cancel: (doc) -> doc.cfnr_enabled = doc.cfda_enabled = false
           toggle: (doc) -> doc.cfnr_enabled = doc.cfda_enabled = not doc.cfnr_enabled
@@ -101,7 +118,11 @@ ETSI Call Forwarding, Unconditional to any number; 3GPP CFU
         when '21' # CFA
           activate: (doc) ->
             if d[3]?
-              doc.cfa_number = d[3]
+              if d[3] is VOICEMAIL
+                doc.cfa_voicemail = true
+              else
+                doc.cfa_voicemail = false
+                doc.cfa_number = d[3]
             doc.cfa_enabled = true
           cancel: (doc) -> doc.cfa_enabled = false
           toggle: (doc) -> doc.cfa_enabled = not doc.cfa_enabled
