@@ -93,7 +93,7 @@ CF Busy is 67 for 3GPP and ETSI
 
 ETSI, 3GPP use 61 for CFDA (No Reply), 62 for CFNR (Not Reachable)
 
-        when '61', '62' # CFNR/CFDA
+        when '61', '62' # CFDA/CFNR
           activate: (doc) ->
             if d[4]?
               doc.inv_timer = parseInt d[4]
@@ -106,6 +106,46 @@ ETSI, 3GPP use 61 for CFDA (No Reply), 62 for CFNR (Not Reachable)
             doc.cfnr_enabled = doc.cfda_enabled = true
           cancel: (doc) -> doc.cfnr_enabled = doc.cfda_enabled = false
           toggle: (doc) -> doc.cfnr_enabled = doc.cfda_enabled = not doc.cfnr_enabled
+          query: seem (doc) ->
+            yield query_number('cfnr').call this, doc
+            if doc.cfnr_enabled
+              yield @pencil.play 'after'
+              yield @action 'phrase', "say-number:#{doc.inv_timer}"
+              yield @pencil.play 'seconds'
+
+        when '610' # CFDA only
+          activate: (doc) ->
+            if d[4]?
+              doc.inv_timer = parseInt d[4]
+            if d[3]?
+              if d[3] is VOICEMAIL
+                doc.cfda_voicemail = true
+              else
+                doc.cfda_voicemail = false
+                doc.cfda_number = d[3]
+            doc.cfda_enabled = true
+          cancel: (doc) -> doc.cfda_enabled = false
+          toggle: (doc) -> doc.cfda_enabled = not doc.cfda_enabled
+          query: seem (doc) ->
+            yield query_number('cfda').call this, doc
+            if doc.cfda_enabled
+              yield @pencil.play 'after'
+              yield @action 'phrase', "say-number:#{doc.inv_timer}"
+              yield @pencil.play 'seconds'
+
+        when '620' # CFNR only
+          activate: (doc) ->
+            if d[4]?
+              doc.inv_timer = parseInt d[4]
+            if d[3]?
+              if d[3] is VOICEMAIL
+                doc.cfnr_voicemail = true
+              else
+                doc.cfnr_voicemail = false
+                doc.cfnr_number = d[3]
+            doc.cfnr_enabled = true
+          cancel: (doc) -> doc.cfnr_enabled = false
+          toggle: (doc) -> doc.cfnr_enabled = not doc.cfnr_enabled
           query: seem (doc) ->
             yield query_number('cfnr').call this, doc
             if doc.cfnr_enabled
