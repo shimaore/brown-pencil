@@ -2,7 +2,6 @@
     @name = "#{pkg.name}:vsc"
 
     assert = require 'assert'
-    seem = require 'seem'
 
     f = (n) -> n.match /^([*#]{1,2})(\d\d)(?:[*](\d+))?(?:[*](\d+))?#?$/
     assert f('*21#')[1] is '*'
@@ -22,7 +21,7 @@ References
 - MMI procedures of https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=570 , code in Annex B (themselves based on ETSI/HF and ITU-T E.131)
 - https://en.wikipedia.org/wiki/Call_forwarding#Europe
 
-    @include = seem ->
+    @include = ->
       return unless @session.direction is 'egress'
       return if @session.forwarding is true
 
@@ -52,25 +51,25 @@ Make sure we don't match (in case @session.VOICEMAIL was not defined properly).
 3GPP also supports '##' for 'erasure'
 
       query_number = (what) ->
-        seem (doc) ->
-          yield @pencil.play what # 'Le renvoi sur occupation est'
+        (doc) ->
+          await @pencil.play what # 'Le renvoi sur occupation est'
           if doc["#{what}_enabled"]
-            yield @pencil.play 'on' # 'activé'
+            await @pencil.play 'on' # 'activé'
             if doc["#{what}_voicemail"]
-              yield @pencil.play 'towards-voicemail' # 'vers la messagerie'
+              await @pencil.play 'towards-voicemail' # 'vers la messagerie'
             else
-              yield @pencil.play 'towards' # 'vers le numéro'
-              yield @pencil.spell doc["#{what}_number"]
+              await @pencil.play 'towards' # 'vers le numéro'
+              await @pencil.spell doc["#{what}_number"]
           else
-            yield @pencil.play 'off' # 'désactivé'
+            await @pencil.play 'off' # 'désactivé'
 
       flip = (what) ->
         activate: (doc) -> doc[what] = true
         cancel: (doc) -> doc[what] = false
         toggle: (doc) -> doc[what] = not doc[what]
-        query: seem (doc) ->
-          yield @pencil.play what
-          yield @pencil.play if doc[what] then 'on' else 'off'
+        query: (doc) ->
+          await @pencil.play what
+          await @pencil.play if doc[what] then 'on' else 'off'
 
       target = switch d[2]
 
@@ -106,12 +105,12 @@ ETSI, 3GPP use 61 for CFDA (No Reply), 62 for CFNR (Not Reachable)
             doc.cfnr_enabled = doc.cfda_enabled = true
           cancel: (doc) -> doc.cfnr_enabled = doc.cfda_enabled = false
           toggle: (doc) -> doc.cfnr_enabled = doc.cfda_enabled = not doc.cfnr_enabled
-          query: seem (doc) ->
-            yield query_number('cfnr').call this, doc
+          query: (doc) ->
+            await query_number('cfnr').call this, doc
             if doc.cfnr_enabled
-              yield @pencil.play 'after'
-              yield @action 'phrase', "say-number:#{doc.inv_timer}"
-              yield @pencil.play 'seconds'
+              await @pencil.play 'after'
+              await @action 'phrase', "say-number:#{doc.inv_timer}"
+              await @pencil.play 'seconds'
 
         when '610' # CFDA only
           activate: (doc) ->
@@ -126,12 +125,12 @@ ETSI, 3GPP use 61 for CFDA (No Reply), 62 for CFNR (Not Reachable)
             doc.cfda_enabled = true
           cancel: (doc) -> doc.cfda_enabled = false
           toggle: (doc) -> doc.cfda_enabled = not doc.cfda_enabled
-          query: seem (doc) ->
-            yield query_number('cfda').call this, doc
+          query: (doc) ->
+            await query_number('cfda').call this, doc
             if doc.cfda_enabled
-              yield @pencil.play 'after'
-              yield @action 'phrase', "say-number:#{doc.inv_timer}"
-              yield @pencil.play 'seconds'
+              await @pencil.play 'after'
+              await @action 'phrase', "say-number:#{doc.inv_timer}"
+              await @pencil.play 'seconds'
 
         when '620' # CFNR only
           activate: (doc) ->
@@ -146,12 +145,12 @@ ETSI, 3GPP use 61 for CFDA (No Reply), 62 for CFNR (Not Reachable)
             doc.cfnr_enabled = true
           cancel: (doc) -> doc.cfnr_enabled = false
           toggle: (doc) -> doc.cfnr_enabled = not doc.cfnr_enabled
-          query: seem (doc) ->
-            yield query_number('cfnr').call this, doc
+          query: (doc) ->
+            await query_number('cfnr').call this, doc
             if doc.cfnr_enabled
-              yield @pencil.play 'after'
-              yield @action 'phrase', "say-number:#{doc.inv_timer}"
-              yield @pencil.play 'seconds'
+              await @pencil.play 'after'
+              await @action 'phrase', "say-number:#{doc.inv_timer}"
+              await @pencil.play 'seconds'
 
 ETSI Call Forwarding, Unconditional to any number; 3GPP CFU
 
@@ -189,7 +188,7 @@ NANPA: 78 and 79
 
       unless action? and target?
         # FIXME play a message indicating invalid choice
-        yield @action 'hangup'
+        await @action 'hangup'
         return
 
 Assume we are in a `huge-play` client/egress context, and @session.number contains the document.
@@ -205,14 +204,14 @@ Make the change
 Save the change
 
         @debug 'Saving', {action,doc}
-        yield @cfg.master_push doc
+        await @cfg.master_push doc
 
 Announce the new state
 
-      yield @action 'answer'
+      await @action 'answer'
       @debug 'Querying', {doc}
-      yield target.query.call this, doc
+      await target.query.call this, doc
 
       @debug 'Hangup'
-      yield @action 'hangup'
+      await @action 'hangup'
       return
