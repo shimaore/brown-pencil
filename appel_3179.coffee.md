@@ -1,6 +1,5 @@
     pkg = require './package'
     @name = "#{pkg.name}:appel_3179"
-    seem = require 'seem'
     seconds = 1000
 
     sleep = (timeout) ->
@@ -9,7 +8,7 @@
 
     bucket = try require 'glorious-bucket'
 
-    @include = seem ->
+    @include = ->
 
       unless bucket?
         @debug.dev 'Missing glorious-bucket'
@@ -49,29 +48,29 @@ Prevent further processing.
 
       @report state:'rio-request', source:@source
 
-      yield @action 'answer'
-      yield @pencil.play 'welcome_internal'
+      await @action 'answer'
+      await @pencil.play 'welcome_internal'
 
-      get_rio_index = seem (rios) =>
+      get_rio_index = (rios) =>
         @debug "get_rio_index", {rios}
         @dtmf.clear()
         @debug 'get_rio_index length', rios.length
         if rios.length > 1
           @debug 'Listing RIOs'
-          yield @pencil.play 'enter_number_first'
+          await @pencil.play 'enter_number_first'
           for v,i in rios when v.rio?
             @debug 'get_rio_index record', i,v
-            yield @pencil.play 'for_number'
-            yield @pencil.spell v.number
-            yield @pencil.playback "voicemail/vm-press"
-            yield @pencil.playback "digits/#{i+1}"
-          buffer = yield @dtmf.expect 1, rios.length.toString().length
+            await @pencil.play 'for_number'
+            await @pencil.spell v.number
+            await @pencil.playback "voicemail/vm-press"
+            await @pencil.playback "digits/#{i+1}"
+          buffer = await @dtmf.expect 1, rios.length.toString().length
         else
           @debug 'Only one RIO available'
           buffer = '1'
 
         if buffer.length is 0
-          yield get_rio_index rios
+          await get_rio_index rios
         else
           @debug 'User selection', buffer
           index = parseInt(buffer)-1
@@ -81,11 +80,11 @@ Prevent further processing.
 
       @debug 'retrieve user', @source
 
-      @session.doc = yield retrieve_user(@source)
-        .catch seem (error) =>
+      @session.doc = await retrieve_user(@source)
+        .catch (error) =>
           @debug.dev "retrieve user: #{error.stack ? error}"
           @report state:'rio-failed', source:@source
-          yield @action 'respond', 503
+          await @action 'respond', 503
           @direction 'rio-failed'
           null
 
@@ -94,21 +93,21 @@ Prevent further processing.
 
       unless @session.doc.rios?
         @debug 'No RIOs'
-        yield @pencil.spell 'BP93'
-        yield @action 'hangup'
+        await @pencil.spell 'BP93'
+        await @action 'hangup'
         return
 
       rios = ({number,rio} for own number,rio of @session.doc.rios)
-      yield get_rio_index rios
+      await get_rio_index rios
         .catch (error) ->
           @debug.dev "get_rio_index failed #{error.stack ? error}"
           get_rio_index rios
 
-      yield @pencil.play 'the_rio'
-      yield @pencil.spell @session.rio_number
-      yield @pencil.play 'is'
-      yield @pencil.spell @session.rio
-      yield @pencil.play 'dont_cancel'
+      await @pencil.play 'the_rio'
+      await @pencil.spell @session.rio_number
+      await @pencil.play 'is'
+      await @pencil.spell @session.rio
+      await @pencil.play 'dont_cancel'
 
 
 Destination
@@ -121,33 +120,33 @@ Send via SMS
 
       if @session.doc.mobile?
         @debug 'Announce mobile', @session.doc.mobile
-        yield @pencil.play 'sms_known'
-        yield @pencil.spell @session.doc.mobile
-        yield @pencil.playback "voicemail/vm-press"
-        yield @pencil.playback "digits/1"
+        await @pencil.play 'sms_known'
+        await @pencil.spell @session.doc.mobile
+        await @pencil.playback "voicemail/vm-press"
+        await @pencil.playback "digits/1"
 
       @debug 'Announce mobile query'
-      yield @pencil.play 'sms_unknown'
-      yield @pencil.playback "voicemail/vm-press"
-      yield @pencil.playback "digits/2"
+      await @pencil.play 'sms_unknown'
+      await @pencil.playback "voicemail/vm-press"
+      await @pencil.playback "digits/2"
 
 Send via email
 --------------
 
       if @session.doc.email?
         @debug 'Announce email'
-        yield @pencil.play 'email'
-        yield @pencil.spell @session.doc.email
-        yield @pencil.playback "voicemail/vm-press"
-        yield @pencil.playback "digits/3"
+        await @pencil.play 'email'
+        await @pencil.spell @session.doc.email
+        await @pencil.playback "voicemail/vm-press"
+        await @pencil.playback "digits/3"
 
 Send via postmail
 -----------------
 
       @debug 'Announce snailmail'
-      yield @pencil.play 'snailmail'
-      yield @pencil.playback "voicemail/vm-press"
-      yield @pencil.playback "digits/4"
+      await @pencil.play 'snailmail'
+      await @pencil.playback "voicemail/vm-press"
+      await @pencil.playback "digits/4"
 
       sms_text = """
         Le RIO associé au numéro #{@session.rio_number[0...6]}XXXX est #{@session.rio}.
@@ -158,40 +157,40 @@ Send via postmail
         number = "33#{number.substr 1}" if number[0] is '0'
         number
 
-      yield @pencil.playback "silence_stream://10000"
+      await @pencil.playback "silence_stream://10000"
 
-      switch yield @dtmf.expect 1, 1
+      switch await @dtmf.expect 1, 1
         when '1'
           if @session.doc.mobile?
             number = clean_number @session.doc.mobile
-            yield send_sms number, sms_text
+            await send_sms number, sms_text
               .catch (error) =>
                 @debug.dev "Send SMS #{error.stack ? error}", number
-                yield @pencil.spell 'BP167'
+                await @pencil.spell 'BP167'
         when '2'
           @dtmf.clear()
-          yield @pencil.playback 'ivr/ivr-please_enter_the_phone_number'
-          number = clean_number yield @dtmf.expect 10, 10
-          yield send_sms number, sms_text
+          await @pencil.playback 'ivr/ivr-please_enter_the_phone_number'
+          number = clean_number await @dtmf.expect 10, 10
+          await send_sms number, sms_text
             .catch (error) =>
               @debug "Send SMS #{error.stack ? error}", number
-              yield @pencil.spell 'BP171'
+              await @pencil.spell 'BP171'
         when '3'
           if @session.doc.email?
-            yield send_email @session.doc.email, rios
+            await send_email @session.doc.email, rios
               .catch (error) =>
                 @debug "Send email #{error.stack ? error}"
-                yield @pencil.spell 'BP177'
+                await @pencil.spell 'BP177'
         when '4'
-          yield send_snailmail @session.doc.nom, @session.doc.adresse_de_facturation, rios
+          await send_snailmail @session.doc.nom, @session.doc.adresse_de_facturation, rios
             .catch (error) =>
               @debug "Send snail mail #{error.stack ? error}"
-              yield @pencil.spell 'BP182'
+              await @pencil.spell 'BP182'
 
         else
           @debug 'No valid choice was made, aborting.'
 
       @debug 'Thank you.'
-      yield @pencil.playback 'ivr/ivr-thank_you_alt'
-      yield sleep 3*seconds
-      yield @action 'hangup'
+      await @pencil.playback 'ivr/ivr-thank_you_alt'
+      await sleep 3*seconds
+      await @action 'hangup'

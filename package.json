@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "prepublish": "coffee -M -c *.coffee.md",
+    "prepublish": "coffee -c *.coffee.md",
     "pretest": "npm install",
     "test": "mocha"
   },
@@ -18,12 +18,11 @@
   "author": "Stéphane Alnet <stephane@shimaore.net> (http://stephane.shimaore.net/)",
   "license": "Unlicense (http://unlicense.org/)",
   "devDependencies": {
-    "coffee-script": "^1.12.7",
+    "coffeescript": "^2.2.4",
     "mocha": "^3.5.0"
   },
   "dependencies": {
-    "moment-timezone": "^0.5.13",
-    "seem": "^2.0.0"
+    "moment-timezone": "^0.5.13"
   },
   "optionalDependencies": {
     "glorious-bucket": "^3.1.9"

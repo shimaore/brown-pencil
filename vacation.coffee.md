@@ -2,17 +2,16 @@
     @name = "#{pkg.name}:vacation"
 
     assert = require 'assert'
-    seem = require 'seem'
 
     moment = require 'moment-timezone'
     day_of = (t) -> t.clone().startOf 'day'
 
-    @include = seem ->
+    @include = ->
       return unless @session.direction is 'egress'
 
       @debug 'Ready'
 
-      is_on_vacation = seem (vacation) =>
+      is_on_vacation = (vacation) =>
         @debug 'is_on_vacation'
 
 Vacation settings
@@ -36,7 +35,7 @@ The user is on vacation. Now let's try to say something intelligent about it.
 
         today = day_of now
 
-        yield @pencil.play 'vacation-person_is_on_vacation'
+        await @pencil.play 'vacation-person_is_on_vacation'
 
         if start?
           start_day = day_of start
@@ -44,35 +43,35 @@ The user is on vacation. Now let's try to say something intelligent about it.
 If the start date is today then simply play the hour.
 
           if start_day is today
-            yield @pencil.play 'vacation-since'
-            yield @action 'phrase', "say-time,#{start.format 'HH:mm'}"
+            await @pencil.play 'vacation-since'
+            await @action 'phrase', "say-time,#{start.format 'HH:mm'}"
 
 TODO: yesterday, etc.
 
           else
-            yield @pencil.play 'vacation-since_day'
-            yield @action 'phrase', "say-day-of-month,#{start.format 'DD'}"
-            yield @action 'phrase', "say-month,#{start.format 'MM'}"
+            await @pencil.play 'vacation-since_day'
+            await @action 'phrase', "say-day-of-month,#{start.format 'DD'}"
+            await @action 'phrase', "say-month,#{start.format 'MM'}"
 
         if end?
           end_day = day_of end
 
           if end_day is today
-            yield @pencil.play 'vacation-person_will_return'
-            yield @pencil.play 'vacation-at'
-            yield @action 'phrase', "say-time,#{end.format 'HH:mm'}"
+            await @pencil.play 'vacation-person_will_return'
+            await @pencil.play 'vacation-at'
+            await @action 'phrase', "say-time,#{end.format 'HH:mm'}"
           else
-            yield @pencil.play 'vacation-person_will_return'
-            yield @pencil.play 'vacation-on'
-            yield @action 'phrase', "say-day-of-month,#{end.format 'DD'}"
-            yield @action 'phrase', "say-month,#{end.format 'MM'}"
+            await @pencil.play 'vacation-person_will_return'
+            await @pencil.play 'vacation-on'
+            await @action 'phrase', "say-day-of-month,#{end.format 'DD'}"
+            await @action 'phrase', "say-month,#{end.format 'MM'}"
 
         true
 
 Assume we are in a `huge-play` client/egress context, and @session.number contains the document.
 
-      if yield is_on_vacation @session.number.vacation
+      if await is_on_vacation @session.number.vacation
         @session.direction = 'vacation'
         @debug 'Hangup'
-        yield @action 'hangup'
+        await @action 'hangup'
         return
