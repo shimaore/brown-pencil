@@ -8,7 +8,7 @@
   },
   "scripts": {
     "prepublish": "coffee -c *.coffee.md",
-    "pretest": "npm install",
+    "pretest": "npm install --only=dev && coffee -c test/*.coffee.md",
     "test": "mocha"
   },
   "repository": {
