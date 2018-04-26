@@ -9,9 +9,11 @@
     assert f('*#21#')[1] is '*#'
     assert f('**21#')[1] is '**'
     assert f('*21#')[2] is '21'
+    assert f('*21#')[3] is undefined
     assert f('*21*35#')[2] is '21'
     assert f('*21*35*89#')[2] is '21'
     assert f('*21*35#')[3] is '35'
+    assert f('*21*35#')[4] is undefined
     assert f('*21*35*89#')[4] is '89'
 
 References
