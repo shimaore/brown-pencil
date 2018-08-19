@@ -24,7 +24,7 @@ References
 - https://en.wikipedia.org/wiki/Call_forwarding#Europe
 
     @include = ->
-      return unless @session.direction is 'egress'
+      return unless @session?.direction is 'egress'
       return if @session.forwarding is true
 
       @debug 'Ready'

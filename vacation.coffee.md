@@ -7,7 +7,7 @@
     day_of = (t) -> t.clone().startOf 'day'
 
     @include = ->
-      return unless @session.direction is 'egress'
+      return unless @session?.direction is 'egress'
 
       @debug 'Ready'
 

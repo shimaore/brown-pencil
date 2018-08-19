@@ -27,7 +27,7 @@ However do not assume we run inside tough-rate. Only assume useful-wind for now.
 - session
 - action()
 
-      return unless @session.direction is 'egress'
+      return unless @session?.direction is 'egress'
       return unless @session.dialplan is 'national'
       return unless @session.country is 'fr'
       return unless @destination is '3179'
