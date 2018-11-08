@@ -1,5 +1,6 @@
     pkg = require './package'
     @name = "#{pkg.name}:vacation"
+    {debug} = (require 'tangible') @name
 
     assert = require 'assert'
 
@@ -9,10 +10,10 @@
     @include = ->
       return unless @session?.direction is 'egress'
 
-      @debug 'Ready'
+      debug 'Ready'
 
       is_on_vacation = (vacation) =>
-        @debug 'is_on_vacation'
+        debug 'is_on_vacation'
 
 Vacation settings
 
@@ -72,6 +73,6 @@ Assume we are in a `huge-play` client/egress context, and @session.number contai
 
       if await is_on_vacation @session.number.vacation
         @session.direction = 'vacation'
-        @debug 'Hangup'
+        debug 'Hangup'
         await @action 'hangup'
         return

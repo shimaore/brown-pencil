@@ -1,10 +1,11 @@
     pkg = require './package'
     @name = "#{pkg.name}:setup"
+    {debug} = (require 'tangible') @name
     path = require 'path'
 
     @include = ->
 
-      @debug 'Start'
+      debug 'Start'
 
       init_done = false
       init = =>

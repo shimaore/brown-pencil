@@ -1,5 +1,6 @@
     pkg = require './package'
     @name = "#{pkg.name}:vsc"
+    {debug} = (require 'tangible') @name
 
     assert = require 'assert'
 
@@ -27,7 +28,7 @@ References
       return unless @session?.direction is 'egress'
       return if @session.forwarding is true
 
-      @debug 'Ready'
+      debug 'Ready'
 
       {VOICEMAIL} = @session
 
@@ -38,7 +39,7 @@ Make sure we don't match (in case @session.VOICEMAIL was not defined properly).
       d = f @destination
       return unless d
 
-      @debug 'Matched', @destination
+      debug 'Matched', @destination
 
       action = switch d[1]
         when '*'
@@ -186,7 +187,7 @@ NANPA: 78 and 79
         when '26' # DND
           flip 'dnd'
 
-      @debug 'Found', {action,target}
+      debug 'Found', {action,target}
 
       unless action? and target?
         # FIXME play a message indicating invalid choice
@@ -200,20 +201,20 @@ Assume we are in a `huge-play` client/egress context, and @session.number contai
 Make the change
 
       unless action is 'query'
-        @debug 'Calling', {action,doc}
+        debug 'Calling', {action,doc}
         target[action].call this, doc
 
 Save the change
 
-        @debug 'Saving', {action,doc}
+        debug 'Saving', {action,doc}
         await @cfg.master_push doc
 
 Announce the new state
 
       await @action 'answer'
-      @debug 'Querying', {doc}
+      debug 'Querying', {doc}
       await target.query.call this, doc
 
-      @debug 'Hangup'
+      debug 'Hangup'
       await @action 'hangup'
       return

@@ -22,7 +22,8 @@
     "mocha": "^5.2.0"
   },
   "dependencies": {
-    "moment-timezone": "^0.5.13"
+    "moment-timezone": "^0.5.13",
+    "tangible": "^3.0.0"
   },
   "optionalDependencies": {
     "glorious-bucket": "^3.1.9"
