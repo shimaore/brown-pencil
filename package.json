@@ -7,8 +7,9 @@
     "test": "test"
   },
   "scripts": {
-    "prepublishOnly": "npm install --only=dev && rm package-lock.json && coffee -c *.coffee.md",
-    "pretest": "npm install --only=dev && coffee -c test/*.coffee.md",
+    "prepublishOnly": "npm run build",
+    "build": "npm install --only=dev && rm package-lock.json && coffee -c *.coffee.md",
+    "pretest": "npm run build && coffee -c test/*.coffee.md",
     "test": "mocha"
   },
   "repository": {
@@ -22,7 +23,7 @@
     "mocha": "^5.2.0"
   },
   "dependencies": {
-    "moment-timezone": "^0.5.13",
+    "moment-timezone": "^0.5.23",
     "tangible": "^3.0.0"
   },
   "optionalDependencies": {
