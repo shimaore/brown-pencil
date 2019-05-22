@@ -1,6 +1,7 @@
     pkg = require './package'
     @name = "#{pkg.name}:vsc"
     {debug} = (require 'tangible') @name
+    Nimble = require 'nimble-direction'
 
     assert = require 'assert'
 
@@ -29,6 +30,8 @@ References
       return if @session.forwarding is true
 
       debug 'Ready'
+
+      {master_push} = Nimble @cfg
 
       {VOICEMAIL} = @session
 
@@ -207,7 +210,7 @@ Make the change
 Save the change
 
         debug 'Saving', {action,doc}
-        await @cfg.master_push doc
+        await master_push doc
 
 Announce the new state
 
