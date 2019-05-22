@@ -3,9 +3,7 @@
     {debug} = (require 'tangible') @name
     seconds = 1000
 
-    sleep = (timeout) ->
-      new Promise (resolve) ->
-        setTimeout resolve, timeout
+    sleep = (timeout) -> new Promise (resolve) -> setTimeout resolve, timeout
 
     bucket = try require 'glorious-bucket'
 

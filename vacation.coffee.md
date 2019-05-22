@@ -72,7 +72,7 @@ TODO: yesterday, etc.
 Assume we are in a `huge-play` client/egress context, and @session.number contains the document.
 
       if await is_on_vacation @session.number.vacation
-        @session.direction = 'vacation'
+        @direction 'vacation'
         debug 'Hangup'
         await @action 'hangup'
         return

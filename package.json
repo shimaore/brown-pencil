@@ -19,7 +19,7 @@
   "author": "Stéphane Alnet <stephane@shimaore.net> (http://stephane.shimaore.net/)",
   "license": "Unlicense (http://unlicense.org/)",
   "devDependencies": {
-    "coffeescript": "^2.2.4",
+    "coffeescript": "^2.4.1",
     "mocha": "^6.1.4"
   },
   "dependencies": {

@@ -3,6 +3,9 @@
     {debug} = (require 'tangible') @name
     Nimble = require 'nimble-direction'
 
+    seconds = 1000
+    sleep = (timeout) -> new Promise (resolve) -> setTimeout resolve, timeout
+
     assert = require 'assert'
 
     f = (n) -> n.match /^([*#]{1,2})(\d\d)(?:[*](\d+))?(?:[*](\d+))?#?$/
@@ -30,6 +33,7 @@ References
       return if @session.forwarding is true
 
       debug 'Ready'
+      @direction 'vsc'
 
       {master_push} = Nimble @cfg
 
@@ -219,5 +223,6 @@ Announce the new state
       await target.query.call this, doc
 
       debug 'Hangup'
+      await sleep 3*seconds
       await @action 'hangup'
       return
