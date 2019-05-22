@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "moment-timezone": "^0.5.23",
+    "nimble-direction": "^9.0.1",
     "tangible": "^3.0.0"
   },
   "optionalDependencies": {

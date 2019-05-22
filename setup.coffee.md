@@ -2,8 +2,11 @@
     @name = "#{pkg.name}:setup"
     {debug} = (require 'tangible') @name
     path = require 'path'
+    Nimble = require 'nimble-direction'
 
     @include = ->
+
+      {provisioning} = Nimble @cfg
 
       debug 'Start'
 
@@ -12,8 +15,6 @@
         return if init_done
         await @set language: 'fr-FR'
         init_done = true
-
-`provisioning` is a `nimble-direction` convention.
 
       @pencil =
         playback: (file) =>
@@ -24,7 +25,7 @@
 
         play: (file) =>
           await init()
-          await @dtmf.playback "#{@cfg.provisioning}/config%3Avoice_prompts/#{file}.wav"
+          await @dtmf.playback "#{provisioning}/config%3Avoice_prompts/#{file}.wav"
 
         spell: (text) =>
           await init()
