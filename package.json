@@ -20,7 +20,7 @@
   "license": "Unlicense (http://unlicense.org/)",
   "devDependencies": {
     "coffeescript": "^2.2.4",
-    "mocha": "^5.2.0"
+    "mocha": "^6.1.4"
   },
   "dependencies": {
     "moment-timezone": "^0.5.23",
