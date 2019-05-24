@@ -33,7 +33,6 @@ References
       return if @session.forwarding is true
 
       debug 'Ready'
-      @direction 'vsc'
 
       {master_push} = Nimble @cfg
 
@@ -47,6 +46,8 @@ Make sure we don't match (in case @session.VOICEMAIL was not defined properly).
       return unless d
 
       debug 'Matched', @destination
+
+      @direction 'vsc'
 
       action = switch d[1]
         when '*'
